@@ -1,1 +1,1 @@
-ansible==2.6.18
+ansible==10.4.0
