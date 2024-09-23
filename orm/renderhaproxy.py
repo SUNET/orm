@@ -82,9 +82,9 @@ class RenderHAProxy(RenderOutput):
             conf = action_config["backend"]
             self.make_backend_action(conf, rule_id)
 
-    def __init__(self, rule_docs, globals_doc=None):
+    def __init__(self, rule_docs, globals_doc=None, templates_dir="templates"):
         super().__init__(
-            rule_docs=rule_docs, globals_doc=globals_doc, output_file="haproxy.cfg"
+            rule_docs=rule_docs, globals_doc=globals_doc, output_file="haproxy.cfg", templates_dir=templates_dir
         )
         self.backend_acls = []
         self.backends = []

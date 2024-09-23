@@ -19,7 +19,7 @@ setup(
     description=('Origin Routing Machine. '
                  'Generating config for HTTP routing software.'),
     install_requires=[
-        'setuptools>=75'
+        'setuptools>=75.0',
         'pyyaml>=5.1',
         'jsonschema>=2.6.0,<3',
         'rfc3986>=1.2.0,<2',

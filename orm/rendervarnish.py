@@ -618,10 +618,10 @@ class RenderVarnish(RenderOutput):
                 config += default_actions
         return config
 
-    def __init__(self, rule_docs, globals_doc=None):
+    def __init__(self, rule_docs, globals_doc=None, templates_dir="templates"):
         # pylint:disable=too-many-locals,too-many-statements
         super().__init__(
-            rule_docs=rule_docs, globals_doc=globals_doc, output_file="varnish.vcl"
+            rule_docs=rule_docs, globals_doc=globals_doc, output_file="varnish.vcl", templates_dir=templates_dir
         )
         self.names = {}
         self.matches = []

@@ -9,7 +9,7 @@ class ORMInternalRenderException(Exception):
 
 
 class RenderOutput:
-    def __init__(self, rule_docs, output_file, globals_doc=None):
+    def __init__(self, rule_docs, output_file, globals_doc=None, templates_dir="templates"):
         self.rule_docs = rule_docs
         if not globals_doc:
             globals_doc = {}
@@ -17,7 +17,7 @@ class RenderOutput:
         self.output_file = output_file
         self.config = ""
         self.jinja = Environment(
-            loader=PackageLoader("orm", "templates"), trim_blocks=True
+            loader=PackageLoader("orm", templates_dir), trim_blocks=True
         )
 
     def write_config_to_file(self, directory=None):

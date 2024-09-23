@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-
+import os
 import orm.parser as parser
 import orm.validator as validator
 from orm.rendervarnish import RenderVarnish
@@ -67,6 +67,21 @@ def main():
         action="store_true",
         default=False,
     )
+    arg_parser.add_argument(
+        "-d",
+        "--templates-dir",
+        help="Do not verify test target certificates.",
+        type=str,
+        default="templates",
+    )
+    arg_parser.add_argument(
+        "-R",
+        "--renderer",
+        help="Which renderer to run",
+        type=str,
+        default="all",
+    )
+
 
     args = arg_parser.parse_args()
     yml_files = parser.list_rules_files(args.orm_rules_path)
@@ -92,7 +107,19 @@ def main():
     if args.check:
         print("All checks passed.")
         exit(0)
+    templates_dir = args.templates_dir
 
+    if templates_dir == "templates":
+        templates_dir = os.path.join(os.path.dirname(__file__), "templates")
+    elif templates_dir.startswith(".") or not (templates_dir.startswith("/") or templates_dir.startswith("\\")):
+        templates_dir = os.path.join(os.getcwd(), templates_dir)
+
+    if not os.path.isdir(templates_dir):
+        print(f"ERROR: Templates directory {templates_dir} does not exist.")
+        exit(1)
+    print(templates_dir)
+
+    renderer = args.renderer
     parsed_globals = None
     defaults = None
     if args.globals_path:
@@ -111,18 +138,28 @@ def main():
             verify_certs=(not args.test_target_insecure),
         )
         exit(0)
-
-    print("Rendering Varnish config...")
-    render_varnish = RenderVarnish(rule_docs=domain_rules, globals_doc=parsed_globals)
-    print("Rendering HAProxy config...")
-    render_haproxy = RenderHAProxy(rule_docs=domain_rules, globals_doc=parsed_globals)
-    if not args.output_dir:
-        render_varnish.print_config()
-        render_haproxy.print_config()
+    renderers = []
+    if renderer == "all":
+        renderers.append("varnish")
+        renderers.append("haproxy")
     else:
-        render_varnish.write_config_to_file(args.output_dir)
-        render_haproxy.write_config_to_file(args.output_dir)
-        print("Config written to " + args.output_dir)
+        renderers.append(renderer)
+    if "varnish" in renderers:
+        print("Rendering Varnish config...")
+        render_varnish = RenderVarnish(rule_docs=domain_rules, globals_doc=parsed_globals, templates_dir=templates_dir)
+        if not args.output_dir:
+            render_varnish.print_config()
+        else:
+            render_varnish.write_config_to_file(args.output_dir)
+            print("Config written to " + args.output_dir)
+    if "haproxy" in renderers:
+        print("Rendering HAProxy config...")
+        render_haproxy = RenderHAProxy(rule_docs=domain_rules, globals_doc=parsed_globals, templates_dir=templates_dir)
+        if not args.output_dir:
+            render_haproxy.print_config()
+        else:
+            render_haproxy.write_config_to_file(args.output_dir)
+            print("Config written to " + args.output_dir)
 
 
 if __name__ == "__main__":
